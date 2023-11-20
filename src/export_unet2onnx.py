@@ -39,8 +39,8 @@ def pth2onnx(weights):
         net,
         input_shape,
         save_path_out,
-        do_constant_folding=False,
-        verbose=True,
+        do_constant_folding=True,
+        verbose=False,
         input_names=["input"],  # 输入节点的名称，可以根据实际情况修改
         output_names=output_names,
         opset_version=11  # 可选的 ONNX 版本号，根据需要指定

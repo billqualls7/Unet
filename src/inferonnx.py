@@ -24,9 +24,9 @@ from tools import *
 if __name__ == '__main__':
     previous_left_fit = [0, 0, 0]
     previous_right_fit = [0, 0, 0]
-    image_path = 'demo/000030.png'
+    image_path = 'demo/0 (1).png'
     # 'run\onnx\exp1\model.onnx'
-    model_path = 'run\onnx\exp9\model.onnx'
+    model_path = 'run\onnx\exp11\model.onnx'
     input_size = (256, 256)
     session = ort.InferenceSession(model_path, providers=['CPUExecutionProvider'])  #需改成GPU
 

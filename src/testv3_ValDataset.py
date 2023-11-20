@@ -14,14 +14,14 @@ import cv2
 import numpy as np
 import torch
 import time
-from Unetv3 import *
+# from Unetv3 import *
 from utils import *
 from data import *
 from torchvision.utils import save_image
 from PIL import Image
 import matplotlib.pyplot as plt
 import tools
-from egeunet import *
+# from egeunet import *
 #'''
 #description: 
 #param {*} img
@@ -156,9 +156,9 @@ def get_angle(img):
 if __name__ == "__main__":
     time0 = time.time()
     save_dir = 'run/infer'  # 保存推理结果的根文件夹路径
-    weights='params/demo/\exp5\min_loss.pt'                      #权重路径+名称
+    weights='params/exp5\min_loss.pt'                      #权重路径+名称
     _input=r"F:\Code\UnetV3\demo/"    #测试集路径
-    num_classes = 6 #标签数量
+    # num_classes = 6 #标签数量
     previous_left_fit = [0, 0, 0]
     previous_right_fit = [0, 0, 0]
     # net=UNet(6).cuda()
@@ -172,14 +172,15 @@ if __name__ == "__main__":
     if os.path.exists(weights):
         # net.load_state_dict(torch.load(weights))
         net = torch.load(weights, map_location=torch.device('cpu'))
+        net.eval()
         print('successfully')
-        save_path = tools.mkdirr(save_dir)
+        # save_path = tools.mkdirr(save_dir)
         while i>-1:
             frame=cv2.imread(_input+'/'+filenames[i-1])
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             heigh=int(frame.shape[0])
             width=int(frame.shape[1])
-            frame=frame[int(heigh*2/3):heigh,0:width]
+            # frame=frame[int(heigh*2/3):heigh,0:width]
             frame = Image.fromarray(np.uint8(frame))   
 
             temp = max(frame.size)
@@ -196,7 +197,7 @@ if __name__ == "__main__":
             img_data=torch.unsqueeze(img_data,dim=0)
             plt.imshow(img)
             plt.show()
-            net.eval()
+            # net.eval()
             time1=time.time()
             ##开始预测
             # _,out=net(img_data)
@@ -213,14 +214,15 @@ if __name__ == "__main__":
             out=out.unsqueeze(dim=0)
             out=(out).permute((1,2,0)).cpu().detach().numpy()
             out=out*255.0
-            plt.imshow(out)
-            plt.show()
-            save_path_out = os.path.join(save_path,f'{filenames[i-1]}')
-            cv2.imwrite(save_path_out,out)
+            
+            # save_path_out = os.path.join(save_path,f'{filenames[i-1]}')
+            # cv2.imwrite(save_path_out,out)
 
             #计算偏差角度
             vtherror=get_angle(out)
             time2=time.time()
+            plt.imshow(out)
+            plt.show()
             print('---------------------------')
             print("vtherror:",vtherror)
             print("fps:",1/(time2-time1))

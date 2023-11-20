@@ -1,0 +1,16 @@
+# 训练模型的时候要保证训练集的图片和标签的文件夹在一个目录下面，
+# 并且名字为JPEGImages和JPEGImages  
+#     例如：F:/Code/UnetV3/trainDataset\JPEGImages  
+#           F:/Code/UnetV3/trainDataset\SegmentationClass  
+
+
+data_path: 'F:/Code/UnetV3/trainDataset'
+train_epch: 500                               # 训练次数
+max_batch_size: 64                            # 表示每个批次的样本数量
+num_classes:  2                               # 不算背景
+train_lr: 0.002                               # 学习率
+train_wd: 0.00                               # 正则化项的权重衰减系数，以减小模型参数的大小
+
+
+model: 'UNetV3_2'
+# net_list = ['UNetCB', 'UNetDC', 'VGG16UNet', 'UNetV3_2', 'UNetV3']

@@ -156,7 +156,7 @@ def get_angle(img):
 if __name__ == "__main__":
     time0 = time.time()
     save_dir = 'run/infer'  # 保存推理结果的根文件夹路径
-    weights='params/exp5\min_loss.pt'                      #权重路径+名称
+    weights='params/exp12\min_loss.pt'                      #权重路径+名称
     _input=r"F:\Code\UnetV3\demo/"    #测试集路径
     # num_classes = 6 #标签数量
     previous_left_fit = [0, 0, 0]
@@ -221,7 +221,7 @@ if __name__ == "__main__":
             #计算偏差角度
             vtherror=get_angle(out)
             time2=time.time()
-            plt.imshow(out)
+            plt.imshow(out, cmap='gray')
             plt.show()
             print('---------------------------')
             print("vtherror:",vtherror)

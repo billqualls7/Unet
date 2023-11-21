@@ -1,3 +1,4 @@
+
 # '''
 # Author: Wuyao 1955416359@qq.com
 # Date: 2023-10-13 21:00:01
@@ -24,10 +25,10 @@ from tools import *
 if __name__ == '__main__':
     previous_left_fit = [0, 0, 0]
     previous_right_fit = [0, 0, 0]
-    image_path = 'demo/0 (1).png'
+    image_path = 'demo/002310.png'
     # 'run\onnx\exp1\model.onnx'
-    model_path = 'run\onnx\exp11\model.onnx'
-    input_size = (256, 256)
+    model_path = 'run\onnx\exp5\model.onnx'
+    input_size = (320, 240)
     session = ort.InferenceSession(model_path, providers=['CPUExecutionProvider'])  #需改成GPU
 
     
@@ -44,12 +45,12 @@ if __name__ == '__main__':
     predicted_labels = np.argmax(output_array, axis=2)
 
     # 将类别映射为灰度值(0-255)
-    gray_image = predicted_labels.astype(np.uint8) * 255
+    gray_image = predicted_labels.astype(np.uint8) 
    
     vtherror=get_angle(gray_image)
 
     time2 = time.time() 
-    plt.imshow(gray_image, cmap='gray')
+    plt.imshow(gray_image)
     plt.show()
     
     print("vtherror:",vtherror)

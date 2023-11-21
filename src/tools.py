@@ -161,6 +161,7 @@ def load_image_as_array(image_path, size, alpha=1, beta=11):
 
 
 
+
     
     # plt.imshow(frame, cmap='gray')
     # plt.show()
@@ -269,7 +270,7 @@ def InitModel(yamlpath):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'\033[95mdevice:{device}\033[0m')
     net = net.to(device)
-    opt = optim.Adam(net.parameters(),lr = train_lr, weight_decay = train_wd)
+    opt = optim.Adam(net.parameters(),lr = train_lr)
     
 
 

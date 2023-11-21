@@ -58,7 +58,8 @@ class UNetV3_2(nn.Module):
 
         self.decoder2 = UNetV3_2._block3(features * 2, features, name="dec2")
 
-        self.decoder1 = UNetV3_2._block3(features, out_channels, name="dec1")
+        # self.decoder1 = UNetV3_2._block3(features, out_channels, name="dec1")
+        self.decoder1 = nn.Conv2d(features, out_channels, kernel_size=1, padding=0, bias=True)
         self.initialize_weights()
     def initialize_weights(self):
         for m in self.modules():

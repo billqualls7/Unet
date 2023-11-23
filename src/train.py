@@ -2,10 +2,11 @@
 # Author: Wuyao 1955416359@qq.com
 # Date: 2023-11-03 19:19:26
 # LastEditors: Wuyao 1955416359@qq.com
-# LastEditTime: 2023-11-21 22:19:34
+# LastEditTime: 2023-11-23 21:12:00
 # FilePath: \UnetV3\src\train.py
-# Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+# Description: v3.3.1优化已知bug
 # '''
+
 
 
 
@@ -69,7 +70,7 @@ if __name__ == '__main__':
                      min_loss = TrainLossrecord    
                      min_loss_weight_path = os.path.join(weight_path, "min_loss.pt")
                      min_loss_round = epoch
-                     torch.save(net, min_loss_weight_path)
+                     torch.save(net.state_dict(), min_loss_weight_path)
                 else: pass
 
             
@@ -81,7 +82,7 @@ if __name__ == '__main__':
     tools.save_to_excel(train_loss_list,weight_path)
     tools.train_print(min_loss_weight_path, min_loss, min_loss_round,execution_time)
     tools.draw(train_epch,train_loss_list,weight_path)
-    pth2onnx(min_loss_weight_path)
+    pth2onnx(min_loss_weight_path, net)
 
 
 

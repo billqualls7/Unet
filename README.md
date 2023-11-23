@@ -2,19 +2,20 @@
  * @Author: Wuyao 1955416359@qq.com
  * @Date: 2023-04-28 13:53:57
  * @LastEditors: Wuyao 1955416359@qq.com
- * @LastEditTime: 2023-11-03 22:46:52
+ * @LastEditTime: 2023-11-23 21:57:52
  * @FilePath: \UnetV2\readme.md
  * @Description:readme
 -->
+# TLS-Unet
 
-src\make_dataset.py 划分数据集  
-使用make_dataset.py可以将已经打完标签的数据集按照7：2：1的比例划分为训练集、验证集、测试集  
-在\image目录下生成三个新的文件夹，分别存储训练集、验证集、测试集的图片  
-在\label目录下生成三个新的文件夹，分别存储训练集、验证集、测试集的标签  
-训练模型的时候要保证训练集的图片和标签的文件夹在一个目录下面，并且名字为JPEGImages和JPEGImages  
-    例如：E:\Code\wyUnet\data\JPEGImages  E:\Code\wyUnet\data\SegmentationClass  
-    在train.py的如下代码中进行修改  
-    data_path = 'E:/Code/wyUnet/data'      
+- src\make_dataset.py 划分数据集  
+- 使用make_dataset.py可以将已经打完标签的数据集按照7：2：1的比例划分为训练集、验证集、测试集  
+- 在\image目录下生成三个新的文件夹，分别存储训练集、验证集、测试集的图片  
+- 在\label目录下生成三个新的文件夹，分别存储训练集、验证集、测试集的标签  
+- 训练模型的时候要保证训练集的图片和标签的文件夹在一个目录下面，并且名字为JPEGImages和-JPEGImages  
+    * 例如：E:\Code\wyUnet\data\JPEGImages  E:\Code\wyUnet\data\SegmentationClass  
+    * 在train.py的如下代码中进行修改  
+    * data_path = 'E:/Code/wyUnet/data'      
 
 
 
@@ -82,6 +83,12 @@ trainDataset： 使用src\make_dataset.py 划分数据集后会在该目录下�
     8. 后续优化方向  
     8.1 增加训练集原图和标签对比功能，训练前检查数据集  
     8.2 针对训练中断情况进行恢复训练，避免重新训练浪费不必要的时间  
+
+## wyunet-v3.3.1  2023-11-23 21:54:59
+    1. 修复onnx导出后推理精度下降问题  
+    2. 新数据集损失值无法下降跟数据集标签有关  
+    3. 新增v4代码，经测试性能不如v3_2  
+
 
 
 

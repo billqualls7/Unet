@@ -12,5 +12,5 @@ train_lr: 0.01                               # 学习率
 train_wd: 0.00                               # 正则化项的权重衰减系数，以减小模型参数的大小
 
 
-model: 'UNetV4'
+model: 'UNetV3_2'
 # net_list = ['UNetCB', 'UNetDC', 'VGG16UNet', 'UNetV3_2', 'UNetV3', 'UNetV4']

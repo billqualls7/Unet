@@ -2,7 +2,7 @@
  * @Author: Wuyao 1955416359@qq.com
  * @Date: 2023-04-28 13:53:57
  * @LastEditors: Wuyao 1955416359@qq.com
- * @LastEditTime: 2023-11-23 22:55:01
+ * @LastEditTime: 2023-11-24 23:23:49
  * @FilePath: \UnetV3\readme.md
  * @Description:readme
 -->
@@ -89,7 +89,9 @@ trainDataset： 使用src\make_dataset.py 划分数据集后会在该目录下�
     2. 新数据集损失值无法下降跟数据集标签有关  
     3. 新增v4代码，经测试性能不如v3_2  
 
-
+## wyunet-v3.3.2  2023-11-24 23:23:49
+    1. 新增libtorch转换程序src\export_unet2trace.py
+    2. 添加ncnn格式的模型，暂时没用
 
 
 ##### 以下思路可提供参考 2023-07-22 15:02:48更新

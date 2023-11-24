@@ -21,6 +21,8 @@ from torchvision.utils import save_image
 from PIL import Image
 import matplotlib.pyplot as plt
 import tools
+from torch.utils import mkldnn as mkldnn_utils
+
 # from egeunet import *
 #'''
 #description: 
@@ -173,6 +175,7 @@ if __name__ == "__main__":
         # net.load_state_dict(torch.load(weights))
         net = torch.load(weights, map_location=torch.device('cpu'))
         net.eval()
+        # net = mkldnn_utils.to_mkldnn(net)
         print('successfully')
         # save_path = tools.mkdirr(save_dir)
         while i>-1:
@@ -201,6 +204,8 @@ if __name__ == "__main__":
             time1=time.time()
             ##开始预测
             # _,out=net(img_data)
+            print(img_data.shape)
+            # img_data = img_data.to_mkldnn()
             out=net(img_data)
             # out0 = out0[0]
             # out0 = out0.squeeze(1).cpu().detach().numpy()

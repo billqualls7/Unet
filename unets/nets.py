@@ -54,7 +54,7 @@ def read_yaml(file_path):
                 print('train_wd:', train_wd)
                 print('model:', model)
                 print('------------------------------------------------------------------')
-                return net, data_path,  train_epch, max_batch_size, train_lr, train_wd
+                return net, data_path,  train_epch, max_batch_size, train_lr, train_wd, model
         # return data
     except FileNotFoundError:
          print("配置文件不存在")

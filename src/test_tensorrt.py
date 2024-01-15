@@ -1,3 +1,11 @@
+# '''
+# Author: Wuyao 1955416359@qq.com
+# Date: 2023-10-06 20:19:28
+# LastEditors: Wuyao 1955416359@qq.com
+# LastEditTime: 2023-11-25 21:21:01
+# FilePath: \UnetV3\src\test_tensorrt.py
+# # Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+# '''
 import tensorrt as trt
 import pycuda.driver as cuda
 import pycuda.autoinit
@@ -20,7 +28,7 @@ def softmax(x):
 
 def get_img_np_nchw(image):
     image_cv = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    image_cv = cv2.resize(image_cv, (256, 256))
+    image_cv = cv2.resize(image_cv, (320, 240))
     mean = np.array([0.485, 0.456, 0.406])
     std = np.array([0.229, 0.224, 0.225])
     img_np = np.array(image_cv, dtype=float) / 255.
@@ -79,7 +87,7 @@ def postprocess_the_outputs(h_outputs, shape_of_output):
     return h_outputs
  
 def landmark_detection(image_path):
-    trt_engine_path = './params/Unetv2fp16.trt'
+    trt_engine_path = 'run/trt/model_tesfp16.trt'
  
     engine = get_engine(trt_engine_path)
     context = engine.create_execution_context()
@@ -88,7 +96,7 @@ def landmark_detection(image_path):
     image = cv2.imread(image_path)
     # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-    image = cv2.resize(image, (256, 256))
+    image = cv2.resize(image, (320, 240))
     img_np_nchw = get_img_np_nchw(image)
 
     img_np_nchw = img_np_nchw.astype(dtype=np.float32)
@@ -100,7 +108,7 @@ def landmark_detection(image_path):
     print('used time: ', 1/(t2-t1))
  
     # shape_of_output = np.array((1, 6, 256, 256), dtype=np.float32)
-    shape_of_output = (1,6,256,256)
+    shape_of_output = (1,6,320,240)
     # print(shape_of_output)
     # print(trt_outputs[0])
    
@@ -119,12 +127,12 @@ def landmark_detection(image_path):
     for (x, y) in pred_landmark.astype(np.int32):
         cv2.circle(image, (x, y), 1, (0, 0, 0), -1)
  
-    # cv2.imshow('landmarks', image)
-    # cv2.waitKey(0)
+    cv2.imshow('landmarks', image)
+    cv2.waitKey(0)
  
     return pred_landmark
  
 if __name__ == '__main__':
-    image_path = 'E:/Code/UnetV2/newDataset/image/test/002430.png'
+    image_path = 'demo/002370.png'
     landmarks = landmark_detection(image_path)
  

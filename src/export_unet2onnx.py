@@ -2,10 +2,11 @@
 # Author: Wuyao 1955416359@qq.com
 # Date: 2023-10-06 20:19:28
 # LastEditors: Wuyao 1955416359@qq.com
-# LastEditTime: 2023-11-23 19:47:21
+# LastEditTime: 2024-01-15 22:32:02
 # FilePath: \UnetV3\src\export_unet2onnx.py
 # Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 # '''
+
 
 
 
@@ -29,13 +30,14 @@ def pth2onnx(weights,unet):
         onnx_path = "model.onnx"
         save_path,_ = tools.mkdirr(save_dir)
         save_path_out = os.path.join(save_path,onnx_path)
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        device = torch.device("cpu")
         # net.load_state_dict(torch.load(weights).state_dict())
         # net.load(weights)
         # model  = torch.load(weights,map_location='cpu')
         # print(model)
+        
         unet.load_state_dict(torch.load(weights))
-
+        unet = unet.to(device)
         
 
         print(torch.__version__)
@@ -68,5 +70,5 @@ def pth2onnx(weights,unet):
 if __name__ == '__main__':
     yamlpath = './cofig/train.yaml'
     net = read_yaml(yamlpath)[0]
-    weights='params/exp13/min_loss.pt'  
+    weights='params/exp14/UNetV3_2min_loss.pt'  
     pth2onnx(weights,net)

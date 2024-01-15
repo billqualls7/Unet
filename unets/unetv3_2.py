@@ -7,7 +7,7 @@ from torch.nn import functional as F
 import torch.nn.init as init
 
 class UNetV3_2(nn.Module):
-    def __init__(self, in_channels=3, out_channels=3, init_features=8):
+    def __init__(self, in_channels=3, out_channels=6, init_features=8):
         super(UNetV3_2, self).__init__()
         # print(out_channels)
         features = init_features

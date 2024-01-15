@@ -8,7 +8,7 @@
 # '''
 from PIL import Image
 
-
+# H*W
 def keep_image_size_open(path, size=(320, 240)):
     img = Image.open(path)
     temp = max(img.size)

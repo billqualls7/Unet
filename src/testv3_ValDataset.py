@@ -174,6 +174,7 @@ if __name__ == "__main__":
     if os.path.exists(weights):
         # net.load_state_dict(torch.load(weights))
         net = torch.load(weights, map_location=torch.device('cpu'))
+        # net.half()
         net.eval()
         # net = mkldnn_utils.to_mkldnn(net)
         print('successfully')

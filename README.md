@@ -2,10 +2,11 @@
  * @Author: Wuyao 1955416359@qq.com
  * @Date: 2023-04-28 13:53:57
  * @LastEditors: Wuyao 1955416359@qq.com
- * @LastEditTime: 2023-11-24 23:23:49
+ * @LastEditTime: 2023-11-25 19:35:04
  * @FilePath: \UnetV3\readme.md
  * @Description:readme
 -->
+
 # TLS-Unet
 
 - src\make_dataset.py 划分数据集  
@@ -17,25 +18,28 @@
     * 在train.py的如下代码中进行修改  
     * data_path = 'E:/Code/wyUnet/data'      
 
+- 请到src\utils.py size=(320, 240)修改模型输入输出大小即图片的H*W，后续集成到yaml文件中
+
+  
+
+1. src\train.py  ：训练  
+
+2. src\test.py ： 测试  
+3. src\test_ValDataset.py  ：使用测试test集数据跑模型
+4. originalDataset  ：存储原始数据集及其标签
+5. newDataset： 使用src\make_dataset.py 划分数据集后会在该目录下生成验证集和测试集
+6. trainDataset： 使用src\make_dataset.py 划分数据集后会在该目录下训练集
 
 
-src\train.py  ：训练  
-src\test.py ： 测试  
-src\test_ValDataset.py  ：使用测试test集数据跑模型
-originalDataset  ：存储原始数据集及其标签
-newDataset： 使用src\make_dataset.py 划分数据集后会在该目录下生成验证集和测试集
-trainDataset： 使用src\make_dataset.py 划分数据集后会在该目录下训练集
-
-
-## wyunetv2.1  
+### wyunetv2.1  
     优化了车道线计算角度的逻辑
     网络参数更改，可转换为TensorRT格式文件
 
-## wyunetv2.2  
+### wyunetv2.2  
     修复已知BUG
     优化训练过程，增加训练可视化，无需指定权重保存路径，训练结果会保存在params/exp文件夹中
 
-## wyunetv2.3  
+### wyunetv2.3  
     1.优化代码，模型会将损失值作为指标，模型训练结束之后会保存最后一次训练结束的模型和所有模型中损失值最小的模型
     2.训练结果会保存在params/exp文件夹中 
     3.epx文件夹中包括损失函数曲线图、每一轮损失值的excel表格、训练过程的对比图在params\exp\train_result 
@@ -48,7 +52,8 @@ trainDataset： 使用src\make_dataset.py 划分数据集后会在该目录下�
     6.4 minLane: 最小的车道线宽度。该参数用于确定车道线的最小宽度，用于过滤掉宽度较小的噪声。可以根据道路的宽度来调整该参数。如果道路较窄，可能需要减小该参数的值
     6.5 增加窗口的数量和宽度可以提高车道线检测的准确性，因为更多的窗口和更宽的窗口可以覆盖更大的搜索范围，减小了漏检和误检的概率。同时，增加每个窗口至少需要的像素点数量和最小车道线宽度可以过滤掉较小的噪声，提升车道线检测的稳定性
 
-# wyunet-v3  
+## wyunet-v3  
+
     wyunet网络优化  
     1.在原来网络的基础上编码器和解码器部分使用深度可分离卷积。
     深度可分离卷积通过先进行深度卷积，再进行逐点卷积，从而减少参数量和计算量。
@@ -56,7 +61,8 @@ trainDataset： 使用src\make_dataset.py 划分数据集后会在该目录下�
     3.在解码器部分，先进行上采样操作，然后将上采样结果与编码器部分的输出进行拼接，再使用深度可分离卷积。  
     4.在initialize_weights方法,使用了init.xavier_uniform_对卷积层的权重进行Xavier均匀初始化, 并使用init.normal_对逐点卷积的权重进行正态分布初始化。同时,对BatchNorm层的权重也进行了初始化。可以根据需要调整mean和std参数来设置不同的均值和标准差。  
 
-## wyunet-v3.2  2023-10-15 15:12:28
+### wyunet-v3.2  2023-10-15 15:12:28
+
     1.取消v3网络中深度可分离卷积部分，采用分离卷积虽然可以减少参数量，但转为ONNX模型之后精度会下降。也可能是训练集样本不够导致。v3网络使用src\train_SeparableUNet.py训练，扩大数据集之后重新实验  
     2.支持多种unet网络结构，差异详见源码。使用不同网络结构进行训练，详见样例                    
         src\train_egeunet.py  src\train_SeparableUNet.py  src\train_unetv3_2.py  
@@ -71,8 +77,9 @@ trainDataset： 使用src\make_dataset.py 划分数据集后会在该目录下�
     6.请参照src\inferonnx.py在EPAI-car中重新部署，以及与ROS的通信  
     7.若速度无法满足要求，可使用onnx模型在嵌入式平台上使用C++语言和onnxruntime-gpu库对模型进行加速推理。对处理结果处理即拟合二阶曲线该部分算法需要移植到C++，后续会更新
     8.训练使用src\train_unetv3_2.py  
-    
-## wyunet-v3.3  2023-11-03 22:01:07  
+
+### wyunet-v3.3  2023-11-03 22:01:07  
+
     1. 增加congfig文件夹，训练参数从cofig\train.yaml进行修改  
     2. 所有网络结构源码存放到unets  
     3. unets\nets.py统一管理网络结构，并读取参数文件进行修改  
@@ -84,17 +91,100 @@ trainDataset： 使用src\make_dataset.py 划分数据集后会在该目录下�
     8.1 增加训练集原图和标签对比功能，训练前检查数据集  
     8.2 针对训练中断情况进行恢复训练，避免重新训练浪费不必要的时间  
 
-## wyunet-v3.3.1  2023-11-23 21:54:59
+#### wyunet-v3.3.1  2023-11-23 21:54:59
     1. 修复onnx导出后推理精度下降问题  
     2. 新数据集损失值无法下降跟数据集标签有关  
     3. 新增v4代码，经测试性能不如v3_2  
 
-## wyunet-v3.3.2  2023-11-24 23:23:49
+#### wyunet-v3.3.2  2023-11-24 23:23:49
     1. 新增libtorch转换程序src\export_unet2trace.py
     2. 添加ncnn格式的模型，暂时没用
 
+#### wyunet-v3.3.3 2024-01-15 22:10:18
 
-##### 以下思路可提供参考 2023-07-22 15:02:48更新
+1. 修复训练脚本bug
+2. 优化训练模型命令规则
+3. 补充：请到src\utils.py size=(320, 240)修改模型输入输出大小即图片的H*W，后续集成到yaml文件中
+4. 添加src\summary.py文件，可在训练结束之后将pt文件导入打印 PyTorch 模型结构和参数数量
+
+```python
+print(summary(net,input_size))
+```
+
+```bash
+----------------------------------------------------------------
+        Layer (type)               Output Shape         Param #
+================================================================
+            Conv2d-1          [-1, 8, 240, 320]             216
+              ReLU-2          [-1, 8, 240, 320]               0
+            Conv2d-3         [-1, 16, 240, 320]           1,152
+              ReLU-4         [-1, 16, 240, 320]               0
+         MaxPool2d-5         [-1, 16, 120, 160]               0
+            Conv2d-6         [-1, 16, 120, 160]           2,304
+              ReLU-7         [-1, 16, 120, 160]               0
+           Dropout-8         [-1, 16, 120, 160]               0
+            Conv2d-9         [-1, 32, 120, 160]           4,608
+             ReLU-10         [-1, 32, 120, 160]               0
+          Dropout-11         [-1, 32, 120, 160]               0
+           Conv2d-12         [-1, 32, 120, 160]           9,216
+             ReLU-13         [-1, 32, 120, 160]               0
+          Dropout-14         [-1, 32, 120, 160]               0
+        MaxPool2d-15           [-1, 32, 60, 80]               0
+           Conv2d-16           [-1, 64, 60, 80]          18,432
+             ReLU-17           [-1, 64, 60, 80]               0
+          Dropout-18           [-1, 64, 60, 80]               0
+           Conv2d-19           [-1, 64, 60, 80]          36,864
+             ReLU-20           [-1, 64, 60, 80]               0
+          Dropout-21           [-1, 64, 60, 80]               0
+        MaxPool2d-22           [-1, 64, 30, 40]               0
+         Upsample-23           [-1, 64, 60, 80]               0
+  ConvTranspose2d-24           [-1, 64, 60, 80]          36,864
+      BatchNorm2d-25           [-1, 64, 60, 80]             128
+          Dropout-26           [-1, 64, 60, 80]               0
+  ConvTranspose2d-27           [-1, 64, 60, 80]          36,864
+             ReLU-28           [-1, 64, 60, 80]               0
+      BatchNorm2d-29           [-1, 64, 60, 80]             128
+          Dropout-30           [-1, 64, 60, 80]               0
+  ConvTranspose2d-31           [-1, 64, 60, 80]          36,864
+             ReLU-32           [-1, 64, 60, 80]               0
+      BatchNorm2d-33           [-1, 64, 60, 80]             128
+         Upsample-34         [-1, 64, 120, 160]               0
+  ConvTranspose2d-35         [-1, 64, 120, 160]          36,864
+      BatchNorm2d-36         [-1, 64, 120, 160]             128
+          Dropout-37         [-1, 64, 120, 160]               0
+  ConvTranspose2d-38         [-1, 32, 120, 160]          18,432
+             ReLU-39         [-1, 32, 120, 160]               0
+      BatchNorm2d-40         [-1, 32, 120, 160]              64
+          Dropout-41         [-1, 32, 120, 160]               0
+  ConvTranspose2d-42         [-1, 32, 120, 160]           9,216
+             ReLU-43         [-1, 32, 120, 160]               0
+      BatchNorm2d-44         [-1, 32, 120, 160]              64
+          Dropout-45         [-1, 32, 120, 160]               0
+  ConvTranspose2d-46         [-1, 16, 120, 160]           4,608
+             ReLU-47         [-1, 16, 120, 160]               0
+      BatchNorm2d-48         [-1, 16, 120, 160]              32
+         Upsample-49         [-1, 16, 240, 320]               0
+  ConvTranspose2d-50         [-1, 16, 240, 320]           2,304
+      BatchNorm2d-51         [-1, 16, 240, 320]              32
+           Conv2d-52          [-1, 8, 240, 320]           1,152
+             ReLU-53          [-1, 8, 240, 320]               0
+           Conv2d-54          [-1, 3, 240, 320]             216
+             ReLU-55          [-1, 3, 240, 320]               0
+================================================================
+Total params: 256,880
+Trainable params: 256,880
+Non-trainable params: 0
+----------------------------------------------------------------
+Input size (MB): 0.88
+Forward/backward pass size (MB): 230.27
+Params size (MB): 0.98
+Estimated Total Size (MB): 232.13
+----------------------------------------------------------------
+```
+
+
+
+# 以下思路可提供参考 2023-07-22 15:02:48更新
 
     1. 由于git库的删除，v2.1中的提及到的功能无法实现，通过历史找回了wyunet在fp16精度下的trt模型，以及测试脚本src\test_tensorrt.py 通过测试发现在加速之后帧率在3060Ti G6X上面能够跑到500帧/秒，但精度严重缺失，应该是在转换过程中出现了问题，未来可以在此基础上进一步研究。需要注意的是该版本训练生成的模型无法转为trt模型，需要对src\train.py进行更改，将整个网络结构及其参数进行保存，该功能和模型转换部分的代码已经丢失。理论上来说，v2.1的train.py训练之后保存的模型，对其重新构建推理器，使其不再调用src\Unet.py，在嵌入式平台的推理应该会有加快。
     2. model.onnx为wyunet的onnx格式模型，该模型同样存在精度严重缺失，应该是在转换过程中出现了问题，未来可以在此基础上进一步研究。思路为使用onnx模型在嵌入式平台上使用C++语言和onnxruntime-gpu库对模型进行加速推理。相关代码为src\export_unet.py src\detect_onnx.py 

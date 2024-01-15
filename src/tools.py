@@ -233,6 +233,7 @@ def mkdirr(save_dir, train = False):
     exp_dirs = [d for d in os.listdir(save_dir) if os.path.isdir(os.path.join(save_dir, d)) and d.startswith('exp')]
     num_exp_dirs = len(exp_dirs)
     save_path = os.path.join(save_dir,f'exp{num_exp_dirs}')
+    train_result_path=''
     if not os.path.exists(save_path):
         os.makedirs(save_path)
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -262,7 +263,7 @@ def ReadData(data_path,max_batch_size):
     return data_loader
 
 def InitModel(yamlpath):
-    net, data_path,  train_epch, max_batch_size, train_lr, train_wd = read_yaml(yamlpath)
+    net, data_path,  train_epch, max_batch_size, train_lr, train_wd, model = read_yaml(yamlpath)
     data_loader = ReadData(data_path,max_batch_size)
     save_dir = 'params'  # 保存模型的根文件夹路径
     weight_path, train_result_path = mkdirr(save_dir,train = True)
@@ -274,7 +275,7 @@ def InitModel(yamlpath):
     
 
 
-    return net, opt, train_epch, data_loader, weight_path, train_result_path
+    return net, opt, train_epch, data_loader, weight_path, train_result_path, model
 
 
 

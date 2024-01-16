@@ -16,9 +16,59 @@ import sys
 from torch.utils.data import DataLoader
 from data import *
 import cv2
-sys.path.append("./unets")
-from nets import read_yaml
+sys.path.append('..')
+from  unets import *
 from torch import nn, optim
+import yaml
+
+
+
+
+def read_yaml(file_path):
+    try:
+        with open(file_path, 'r',encoding='utf-8') as file:
+            config = yaml.safe_load(file)
+            # 将 YAML 转换为 Python 字典
+            data_path = config['data_path']
+            train_epch = config['train_epch']
+            max_batch_size = config['max_batch_size']
+            nc = config['num_classes'] + 1
+            train_lr = config['train_lr']
+            train_wd = config['train_wd']
+            model = config['model']
+            # net_list = ['UNetCB', 'UNetDC', 'VGG16UNet', 'UNetV3_2', 'UNetV3']
+            net_dic = {'UNetCB': 'UNetCB(num_classes = nc)',
+            'UNetDC': 'UNetDC(num_classes = nc)',
+            'VGG16UNet': 'VGG16UNet(num_classes = nc)',
+            'UNetV3_2': 'UNetV3_2(out_channels = nc)',
+            'UNetV3': 'UNetV3(out_channels = nc)',
+            'UNetV4': 'UNetV4(out_channels = nc)',
+
+            }
+            img_size = (config["img_size"]["H"], config["img_size"]["W"])
+            if model not in net_dic:
+                print('\033[91m' + "Error Net. Please check your yaml. \n"+'path: '+file_path + '\033[0m')
+                sys.exit()
+            else:
+                net = eval(net_dic[model])
+                print('------------------------------------------------------------------')
+                print('model:             \033[92m{}\033[0m'.format(model))
+                print('data_path:         \033[92m{}\033[0m'.format(data_path))
+                print('train_epch:        \033[92m{}\033[0m'.format(train_epch))
+                print('max_batch_size:    \033[92m{}\033[0m'.format(max_batch_size))
+                print('num_classes:       \033[92m{}\033[0m'.format(nc))
+                print('train_lr:          \033[92m{}\033[0m'.format(train_lr))
+                print('train_wd:          \033[92m{}\033[0m'.format(train_wd))
+                print('img_size_H*W:      \033[92m{}\033[0m'.format(img_size))
+                print('------------------------------------------------------------------')
+                return net, data_path,  train_epch, max_batch_size, train_lr, train_wd, model,img_size
+        # return data
+    except FileNotFoundError:
+         print("配置文件不存在")
+
+    except yaml.YAMLError:
+        print("配置文件格式错误")
+
 
 def find_line_fit(img, name = "default" ,nwindows=4, margin=100, minpix=100 , minLane = 100):
     # previous_left_fit = None
@@ -221,11 +271,11 @@ def save_to_excel(var1,path):
 
 
 def train_print(min_loss_weight_path, prev_loss, min_loss_round,execution_time):
-    print('\n------------------------------------------------------------------')
-    print(f'\033[92mSave model successfully at {min_loss_weight_path}\033[0m')
-    print(f'\033[92mmini_loss: {prev_loss}\033[0m')
-    print(f'\033[92mmin_loss_round: {min_loss_round}\033[0m')
-    print('\033[92m' + "Execution time: " + str(execution_time) + " minutes" + '\033[0m')
+    print('------------------------------------------------------------------')
+    print('%-30s%s' % ('Save model successfully at', '\033[92m{}\033[0m'.format(min_loss_weight_path)))
+    print('%-30s\033[92m%s\033[0m' % ('mini_loss:', prev_loss))
+    print('%-30s\033[92m%s\033[0m' % ('min_loss_round:', min_loss_round))
+    print('%-30s\033[92m%s minutes\033[0m' % ('Execution time:', execution_time))
     print('------------------------------------------------------------------')
 
 def mkdirr(save_dir, train = False):
@@ -237,7 +287,7 @@ def mkdirr(save_dir, train = False):
     if not os.path.exists(save_path):
         os.makedirs(save_path)
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f'\033[95m{current_time} save path:{save_path}\033[0m')
+        print(f'{current_time} \nsave path:     \033[92m{save_path}\033[0m')        
         train_result_path = os.path.join(save_path,"train_result")
         if train :os.makedirs(train_result_path)
     return save_path, train_result_path
@@ -256,20 +306,24 @@ def check(train_epch):
         print('\033[91m' + "Error: train_epoch is not enough. Exiting program." + '\033[0m')
         sys.exit()
 
-def ReadData(data_path,max_batch_size):
-    data_loader = DataLoader(MyDataset(data_path), batch_size=max_batch_size, shuffle=True)
-    total_trainimgs = len(data_loader.dataset)
-    print(f'\033[95mtrain_imgs:{total_trainimgs}\033[0m')
+def ReadData(data_path,max_batch_size,imgsize):
+    data_loader = DataLoader(MyDataset(data_path, size=imgsize), batch_size=max_batch_size, shuffle=True)
+
     return data_loader
 
 def InitModel(yamlpath):
-    net, data_path,  train_epch, max_batch_size, train_lr, train_wd, model = read_yaml(yamlpath)
-    data_loader = ReadData(data_path,max_batch_size)
-    save_dir = 'params'  # 保存模型的根文件夹路径
+    net, data_path,\
+    train_epch, max_batch_size,\
+    train_lr, train_wd, model, imgsize = read_yaml(yamlpath)
+    data_loader = ReadData(data_path,max_batch_size,imgsize)
+    save_dir = '../params'  # 保存模型的根文件夹路径
     weight_path, train_result_path = mkdirr(save_dir,train = True)
-    check(train_epch)
+    # check(train_epch)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f'\033[95mdevice:{device}\033[0m')
+    total_trainimgs = len(data_loader.dataset)
+    print('train_imgs:         \033[92m{}\033[0m'.format(total_trainimgs))
+    print('device:             \033[92m{}\033[0m'.format(device))
+
     net = net.to(device)
     opt = optim.Adam(net.parameters(),lr = train_lr)
     
@@ -282,4 +336,4 @@ def InitModel(yamlpath):
     
 
 if __name__ == '__main__':
-    InitModel('F:/Code/UnetV3/cofig/train.yaml')
+    read_yaml('F:/Code/UnetV3/cofig/train.yaml')

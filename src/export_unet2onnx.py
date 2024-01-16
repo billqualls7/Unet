@@ -2,10 +2,11 @@
 # Author: Wuyao 1955416359@qq.com
 # Date: 2023-10-06 20:19:28
 # LastEditors: Wuyao 1955416359@qq.com
-# LastEditTime: 2024-01-15 22:32:02
+# LastEditTime: 2024-01-16 21:40:56
 # FilePath: \UnetV3\src\export_unet2onnx.py
 # Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 # '''
+
 
 
 
@@ -18,17 +19,17 @@ import torchvision
 import torch.onnx as onnx
 import tools
 import sys
-sys.path.append("./unets")
-from nets import read_yaml
+
+from tools import read_yaml
 import shutil
 import onnx
 
 
-def pth2onnx(weights,unet):
+def pth2onnx(weights,unet,save_path):
     try:
-        save_dir = 'run\onnx' 
+        # save_dir = 'run\onnx' 
         onnx_path = "model.onnx"
-        save_path,_ = tools.mkdirr(save_dir)
+        # save_path,_ = tools.mkdirr(save_dir)
         save_path_out = os.path.join(save_path,onnx_path)
         device = torch.device("cpu")
         # net.load_state_dict(torch.load(weights).state_dict())
@@ -60,8 +61,9 @@ def pth2onnx(weights,unet):
         )
         # onnx_model = onnx.load(save_path_out)
         # print(onnx_model)
-
+        print('------------------------------------------------------------------')
         print(f'\033[92mTrans model successfully at {save_path_out}\033[0m')
+        print('------------------------------------------------------------------')
     except Exception as e:
         print(f"Failed to convert model: {e}")
         shutil.rmtree(save_path)

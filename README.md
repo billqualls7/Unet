@@ -25,10 +25,18 @@
 1. src\train.py  ：训练  
 
 2. src\test.py ： 测试  
+
 3. src\test_ValDataset.py  ：使用测试test集数据跑模型
+
 4. originalDataset  ：存储原始数据集及其标签
+
 5. newDataset： 使用src\make_dataset.py 划分数据集后会在该目录下生成验证集和测试集
+
 6. trainDataset： 使用src\make_dataset.py 划分数据集后会在该目录下训练集
+
+7. ModuleNotFoundError: No module named 'nets' 出现类似情况，请在报错位置使用全局路径
+
+   
 
 
 ### wyunetv2.1  
@@ -180,6 +188,61 @@ Forward/backward pass size (MB): 230.27
 Params size (MB): 0.98
 Estimated Total Size (MB): 232.13
 ----------------------------------------------------------------
+```
+
+#### wyunet-v3.3.3 2024-01-15 22:10:18
+
+规范代码书写，添加训练说明
+
+```bash
+终端执行------------
+python train.py -h
+终端输出------------
+usage: ./train.py [-h] [--yamlpath] [--onnx]
+
+Unet train.py
+
+optional arguments:
+  -h, --help   show this help message and exit
+  --yamlpath   train params
+  --onnx       creat onnx ? True or False default=False
+  
+终端执行------------ 选择生成ONNX模型 
+python train.py --onnx True
+
+终端输出------------
+
+------------------------------------------------------------------
+model:             UNetV3_2
+data_path:         F:/Code/UnetV3/trainDataset
+train_epch:        4
+max_batch_size:    16
+num_classes:       6
+train_lr:          0.01
+train_wd:          0.0
+img_size_H*W:      (320, 240)
+------------------------------------------------------------------     
+2024-01-16 22:25:59
+save path:     ../params\exp11
+train_imgs:         122
+device:             cuda
+0%|                                           | 0/8 [00:00<?, ?it/s]0-0-train_loss===>>1.9120261669158936
+ 12%|████▍                              | 1/8 [00:01<00:10,  1.48s/it]0-1-train_loss===>>1.8240903615951538
+ 25%|████████▊                          | 2/8 [00:02<00:05,  1.09it/s]0-2-train_loss===>>1.695765733718872
+ 38%|█████████████▏                     | 3/8 [00:02<00:03,  1.36it/s]0
+ ....
+ ....
+ .....
+------------------------------------------------------------------
+Trans model successfully at ../params\exp11\model.onnx
+------------------------------------------------------------------     
+------------------------------------------------------------------
+Save model successfully at    ../params\exp11\UNetV3_2_min_loss.pt
+mini_loss:                    0.039560265839099884
+min_loss_round:               3
+Execution time:               0.29 minutes
+------------------------------------------------------------------ 
+
 ```
 
 

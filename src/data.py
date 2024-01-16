@@ -1,10 +1,10 @@
 # '''
 # Author: Wuyao 1955416359@qq.com
-# Date: 2023-07-22 14:52:24
+# Date: 2023-10-06 20:19:28
 # LastEditors: Wuyao 1955416359@qq.com
-# LastEditTime: 2023-07-22 14:55:01
+# LastEditTime: 2024-01-16 21:54:20
 # FilePath: \UnetV3\src\data.py
-# Description: 加载数据集
+# Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 # '''
 
 
@@ -25,7 +25,8 @@ transform = transforms.Compose([
 
 
 class MyDataset(Dataset):
-    def __init__(self, path):
+    def __init__(self, path, size=(320, 240)):
+        self.size=size
         self.path = path
         self.name = os.listdir(os.path.join(path, 'SegmentationClass'))
 
@@ -36,8 +37,8 @@ class MyDataset(Dataset):
         segment_name = self.name[index]  # xx.png
         segment_path = os.path.join(self.path, 'SegmentationClass', segment_name)
         image_path = os.path.join(self.path, 'JPEGImages', segment_name)
-        segment_image = keep_image_size_open(segment_path)
-        image = keep_image_size_open_rgb(image_path)
+        segment_image = keep_image_size_open(segment_path, size=self.size)
+        image = keep_image_size_open_rgb(image_path, size=self.size)
         return transform(image), torch.Tensor(np.array(segment_image))
 
 

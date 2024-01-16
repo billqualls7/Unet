@@ -1,11 +1,11 @@
-# '''
-# Author: Wuyao 1955416359@qq.com
-# Date: 2023-11-03 19:19:26
-# LastEditors: Wuyao 1955416359@qq.com
-# LastEditTime: 2024-01-15 22:10:18
-# FilePath: \UnetV3\src\train.py
-# Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
-# '''
+'''
+Author: Wuyao 1955416359@qq.com
+Date: 2023-11-03 19:19:26
+LastEditors: Wuyao 1955416359@qq.com
+LastEditTime: 2024-01-16 22:11:40
+FilePath: /UnetV3/src/train.py
+Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+'''
 
 
 
@@ -23,8 +23,9 @@ import subprocess
 import time
 import tools
 from export_unet2onnx import pth2onnx
+import argparse
 #----------------------------------------------------------
-yamlpath = './cofig/train.yaml'                          ##
+yamlpath = '../cofig/train.yaml'                   ##default
 #----------------------------------------------------------
 
 
@@ -32,9 +33,21 @@ train_loss_list = []
 ptname = []
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser("./train.py", description='Unet train.py')
+    # 给这个解析对象添加命令行参数
+    parser.add_argument('--yamlpath', type=str, metavar='', default=yamlpath ,help='train params')
+    parser.add_argument('--onnx', type=bool, metavar='', default=False, help='creat onnx ? True or False default=False')
+    args = parser.parse_args()  # 获取所有参数
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    net, opt, train_epch, data_loader, weight_path, train_result_path, model = tools.InitModel(yamlpath)
+    net,\
+    opt,\
+    train_epch,\
+    data_loader,\
+    weight_path,\
+    train_result_path,\
+    model_type = tools.InitModel(args.yamlpath)
     
     loss_fun = nn.CrossEntropyLoss()
     epoch = 0
@@ -68,11 +81,11 @@ if __name__ == '__main__':
             train_loss_list.append(TrainLossrecord)
 
             if epoch > (train_epch/2):  #只保留后面的训练模型，前期训练模型损失值大，没有必要保存，增加了CPU和硬盘之间的IO操作，理论上会降低训练速度
-                last_weight_path= os.path.join(weight_path, model+"_last.pt")
+                last_weight_path= os.path.join(weight_path, model_type+"_last.pt")
                 torch.save(net, last_weight_path)
                 if TrainLossrecord < min_loss:    #找出损失值最小的模型
                      min_loss = TrainLossrecord    
-                     min_loss_weight_path = os.path.join(weight_path, model+"_min_loss.pt")
+                     min_loss_weight_path = os.path.join(weight_path, model_type+"_min_loss.pt")
                      min_loss_round = epoch
                      torch.save(net.state_dict(), min_loss_weight_path)
                 else: pass
@@ -82,12 +95,14 @@ if __name__ == '__main__':
         epoch += 1
     endtime = time.time()
     execution_time = round((endtime - starttime) / 60, 2)
-    pth2onnx(min_loss_weight_path, net)
+    if args.onnx :
+        pth2onnx(min_loss_weight_path, net, weight_path)
     tools.save_to_excel(train_loss_list,weight_path)
     tools.train_print(min_loss_weight_path, min_loss, min_loss_round,execution_time)
     tools.draw(train_epch,train_loss_list,weight_path)
 
     
+
 
 
 

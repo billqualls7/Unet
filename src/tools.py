@@ -318,7 +318,7 @@ def InitModel(yamlpath):
     data_loader = ReadData(data_path,max_batch_size,imgsize)
     save_dir = '../params'  # 保存模型的根文件夹路径
     weight_path, train_result_path = mkdirr(save_dir,train = True)
-    # check(train_epch)
+    check(train_epch)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     total_trainimgs = len(data_loader.dataset)
     print('train_imgs:         \033[92m{}\033[0m'.format(total_trainimgs))

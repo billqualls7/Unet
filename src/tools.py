@@ -292,13 +292,13 @@ def mkdirr(save_dir, train = False):
         if train :os.makedirs(train_result_path)
     return save_path, train_result_path
 
-def draw(train_epch,train_loss_list,weight_path):
+def draw(name, train_epch,train_loss_list,weight_path):
     epochs = list(range(1, train_epch + 1))
-    plt.plot(epochs, train_loss_list, label='Train Loss')
+    plt.plot(epochs, train_loss_list, label=name)
     plt.xlabel('Epoch')
-    plt.ylabel('Loss')
+    plt.ylabel(name)
     plt.legend()
-    plt.savefig(weight_path+'/train_loss.png')  # 保存图片
+    plt.savefig(weight_path+'/'+name+'.png')  # 保存图片
     plt.show()
 
 def check(train_epch):
@@ -318,7 +318,7 @@ def InitModel(yamlpath):
     data_loader = ReadData(data_path,max_batch_size,imgsize)
     save_dir = '../params'  # 保存模型的根文件夹路径
     weight_path, train_result_path = mkdirr(save_dir,train = True)
-    check(train_epch)
+    # check(train_epch)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     total_trainimgs = len(data_loader.dataset)
     print('train_imgs:         \033[92m{}\033[0m'.format(total_trainimgs))

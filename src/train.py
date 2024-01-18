@@ -30,6 +30,7 @@ yamlpath = '../cofig/train.yaml'                   ##default
 
 
 train_loss_list = []
+accuracies = []
 ptname = []
 
 if __name__ == '__main__':
@@ -51,6 +52,8 @@ if __name__ == '__main__':
     
     loss_fun = nn.CrossEntropyLoss()
     epoch = 0
+    total = 0
+    correct = 0
     min_loss = float('inf') 
     starttime = time.time()
     while epoch < train_epch:
@@ -61,6 +64,11 @@ if __name__ == '__main__':
             # print(segment_image.shape)
             out_image = net(image)
             # print(out_image.shape)
+            _, predicted = torch.max(out_image.data, 1)
+            total += segment_image.size(0)
+            correct += (predicted == segment_image).sum().item()
+            accuracy = 100 * correct / total
+            
             train_loss = loss_fun(out_image, segment_image.long())
             opt.zero_grad()
             train_loss.backward()
@@ -77,6 +85,8 @@ if __name__ == '__main__':
             save_image(img, f'{train_result_path}/{i}.png')
         
         if epoch % 1 == 0:
+            
+            accuracies.append(accuracy)
             TrainLossrecord=train_loss.item()
             train_loss_list.append(TrainLossrecord)
 
@@ -99,8 +109,8 @@ if __name__ == '__main__':
         pth2onnx(min_loss_weight_path, net, weight_path)
     tools.save_to_excel(train_loss_list,weight_path)
     tools.train_print(min_loss_weight_path, min_loss, min_loss_round,execution_time)
-    tools.draw(train_epch,train_loss_list,weight_path)
-
+    tools.draw('loss', train_epch,train_loss_list,weight_path)
+    tools.draw('acc', train_epch,accuracies,weight_path)
     
 
 

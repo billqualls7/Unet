@@ -2,10 +2,11 @@
 # Author: Wuyao 1955416359@qq.com
 # Date: 2023-10-06 20:19:28
 # LastEditors: Wuyao 1955416359@qq.com
-# LastEditTime: 2024-01-16 21:40:56
+# LastEditTime: 2024-01-19 19:16:45
 # FilePath: \UnetV3\src\export_unet2onnx.py
 # Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 # '''
+
 
 
 
@@ -20,7 +21,7 @@ import torch.onnx as onnx
 import tools
 import sys
 
-from tools import read_yaml
+from tools import InitModel
 import shutil
 import onnx
 
@@ -71,6 +72,6 @@ def pth2onnx(weights,unet,save_path):
 
 if __name__ == '__main__':
     yamlpath = './cofig/train.yaml'
-    net = read_yaml(yamlpath)[0]
+    net = InitModel(yamlpath)
     weights='params/exp14/UNetV3_2min_loss.pt'  
-    pth2onnx(weights,net)
+    pth2onnx(weights,net.net)

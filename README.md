@@ -11,32 +11,62 @@
 
 - src\make_dataset.py 划分数据集  
 - 使用make_dataset.py可以将已经打完标签的数据集按照7：2：1的比例划分为训练集、验证集、测试集  
-- 在\image目录下生成三个新的文件夹，分别存储训练集、验证集、测试集的图片  
-- 在\label目录下生成三个新的文件夹，分别存储训练集、验证集、测试集的标签  
 - 训练模型的时候要保证训练集的图片和标签的文件夹在一个目录下面，并且名字为JPEGImages和-JPEGImages  
-    * 例如：E:\Code\wyUnet\data\JPEGImages  E:\Code\wyUnet\data\SegmentationClass  
-    * 在train.py的如下代码中进行修改  
-    * data_path = 'E:/Code/wyUnet/data'      
 
-- 请到src\utils.py size=(320, 240)修改模型输入输出大小即图片的H*W，后续集成到yaml文件中
+```txt
+例如：E:\Code\wyUnet\data\JPEGImages  E:\Code\wyUnet\data\SegmentationClass  
 
+在train.py的如下代码中进行修改  
+
+data_path = 'E:/Code/wyUnet/data'      
+```
+
+
+
+- [x] 请到src\utils.py size=(320, 240)修改模型输入输出大小即图片的H*W，后续集成到yaml文件中
+
+    
+
+1. originalDataset  ：存储原始数据集及其标签
+
+   ```python
+   globalpath = "F:/Code/UnetV3/dataset/"
+   orig = globalpath+"orignialDataset/" 	## 原始数据集
+   train = globalpath+"trainDataset/"		## 训练集
+   val = globalpath+"valDataset/"   		## 验证集
+   test = globalpath+"testDataset/"		## 测试集
+   ```
+
+2. src\train.py  ：训练  
+
+```bash
+终端执行------------
+python train.py -h
+终端输出------------
+usage: ./train.py [-h] [--yamlpath] [--onnx]
+
+Unet train.py
+
+optional arguments:
+  -h, --help   show this help message and exit
+  --yamlpath   train params
+  --onnx       creat onnx ? True or False default=False
   
+终端执行------------ 选择生成ONNX模型 
+python train.py --onnx True
+```
 
-1. src\train.py  ：训练  
+3. src\test.py ： 测试  （弃用）
 
-2. src\test.py ： 测试  
+4. src\test_ValDataset.py  ：使用测试test集数据跑模型（弃用）
 
-3. src\test_ValDataset.py  ：使用测试test集数据跑模型
+5. 请使用板载最新版推理脚本
 
-4. originalDataset  ：存储原始数据集及其标签
-
-5. newDataset： 使用src\make_dataset.py 划分数据集后会在该目录下生成验证集和测试集
-
-6. trainDataset： 使用src\make_dataset.py 划分数据集后会在该目录下训练集
+6. src/inferonnx.py 模型转为ONNX后，可用此脚本进行推理
 
 7. ModuleNotFoundError: No module named 'nets' 出现类似情况，请在报错位置使用全局路径
 
-   
+
 
 
 ### wyunetv2.1  
@@ -190,8 +220,6 @@ Estimated Total Size (MB): 232.13
 ----------------------------------------------------------------
 ```
 
-#### wyunet-v3.3.3 2024-01-15 22:10:18
-
 规范代码书写，添加训练说明
 
 ```bash
@@ -244,6 +272,26 @@ Execution time:               0.29 minutes
 ------------------------------------------------------------------ 
 
 ```
+
+### wyunet-v3.4 2024-01-19
+
+优化src/make_dataset.py数据集划分代码结构
+
+修改训练逻辑，增加验证集，
+
+请到val文件夹中查看训练效果
+
+（在每个训练周期结束后，通过比较验证集的损失，决定是否需要降低学习率。如果验证集的损失没有下降，则将学习率减小到原来的10%。**数据集样本过少，这点还需验证是否生效**       这块代码有点问题 之后再改）
+
+优化数据集存放结构
+
+增加混淆矩阵及其相关性能指标可视化模块，详见src\tools.py SegmentationMetric
+
+[【语义分割】评价指标：PA、CPA、MPA、IoU、MIoU详细总结和代码实现_语义分割mpa计算公式-CSDN博客](https://blog.csdn.net/smallworldxyl/article/details/121570419?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_utm_term~default-5-121570419-blog-127939004.235^v40^pc_relevant_anti_vip_base&spm=1001.2101.3001.4242.4&utm_relevant_index=8)
+
+acc曲线存疑，后续有足够的数据集再验证这部分的正确性
+
+
 
 
 

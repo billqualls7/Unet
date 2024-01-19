@@ -16,58 +16,10 @@ import sys
 from torch.utils.data import DataLoader
 from data import *
 import cv2
-sys.path.append('..')
+sys.path.append('../')
 from  unets import *
 from torch import nn, optim
 import yaml
-
-
-
-
-def read_yaml(file_path):
-    try:
-        with open(file_path, 'r',encoding='utf-8') as file:
-            config = yaml.safe_load(file)
-            # 将 YAML 转换为 Python 字典
-            data_path = config['data_path']
-            train_epch = config['train_epch']
-            max_batch_size = config['max_batch_size']
-            nc = config['num_classes'] + 1
-            train_lr = config['train_lr']
-            train_wd = config['train_wd']
-            model = config['model']
-            # net_list = ['UNetCB', 'UNetDC', 'VGG16UNet', 'UNetV3_2', 'UNetV3']
-            net_dic = {'UNetCB': 'UNetCB(num_classes = nc)',
-            'UNetDC': 'UNetDC(num_classes = nc)',
-            'VGG16UNet': 'VGG16UNet(num_classes = nc)',
-            'UNetV3_2': 'UNetV3_2(out_channels = nc)',
-            'UNetV3': 'UNetV3(out_channels = nc)',
-            'UNetV4': 'UNetV4(out_channels = nc)',
-
-            }
-            img_size = (config["img_size"]["H"], config["img_size"]["W"])
-            if model not in net_dic:
-                print('\033[91m' + "Error Net. Please check your yaml. \n"+'path: '+file_path + '\033[0m')
-                sys.exit()
-            else:
-                net = eval(net_dic[model])
-                print('------------------------------------------------------------------')
-                print('model:             \033[92m{}\033[0m'.format(model))
-                print('data_path:         \033[92m{}\033[0m'.format(data_path))
-                print('train_epch:        \033[92m{}\033[0m'.format(train_epch))
-                print('max_batch_size:    \033[92m{}\033[0m'.format(max_batch_size))
-                print('num_classes:       \033[92m{}\033[0m'.format(nc))
-                print('train_lr:          \033[92m{}\033[0m'.format(train_lr))
-                print('train_wd:          \033[92m{}\033[0m'.format(train_wd))
-                print('img_size_H*W:      \033[92m{}\033[0m'.format(img_size))
-                print('------------------------------------------------------------------')
-                return net, data_path,  train_epch, max_batch_size, train_lr, train_wd, model,img_size
-        # return data
-    except FileNotFoundError:
-         print("配置文件不存在")
-
-    except yaml.YAMLError:
-        print("配置文件格式错误")
 
 
 def find_line_fit(img, name = "default" ,nwindows=4, margin=100, minpix=100 , minLane = 100):
@@ -261,9 +213,9 @@ def resize_image(image, size):
 
 #     return array
 
-def save_to_excel(var1,path):
+def save_to_excel(name,var1,path):
     # 创建一个DataFrame对象
-    df = pd.DataFrame({'loss': var1})
+    df = pd.DataFrame({name: var1})
     
     # 将DataFrame保存到Excel文件
     excel_path= os.path.join(path,"train.xlsx")
@@ -284,21 +236,25 @@ def mkdirr(save_dir, train = False):
     num_exp_dirs = len(exp_dirs)
     save_path = os.path.join(save_dir,f'exp{num_exp_dirs}')
     train_result_path=''
+    val_path = ''
     if not os.path.exists(save_path):
         os.makedirs(save_path)
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f'{current_time} \nsave path:     \033[92m{save_path}\033[0m')        
         train_result_path = os.path.join(save_path,"train_result")
-        if train :os.makedirs(train_result_path)
+        val_path = os.path.join(save_path,"val")
+        if train :
+            os.makedirs(train_result_path)
+            os.makedirs(val_path)
     return save_path, train_result_path
 
-def draw(train_epch,train_loss_list,weight_path):
-    epochs = list(range(1, train_epch + 1))
-    plt.plot(epochs, train_loss_list, label='Train Loss')
+def draw(name, epch,train_list,weight_path):
+    epochs = list(range(1, epch + 1))
+    plt.plot(epochs, train_list, label=name)
     plt.xlabel('Epoch')
-    plt.ylabel('Loss')
+    plt.ylabel(name)
     plt.legend()
-    plt.savefig(weight_path+'/train_loss.png')  # 保存图片
+    plt.savefig(weight_path+'/' + name + '.png')  # 保存图片
     plt.show()
 
 def check(train_epch):
@@ -311,29 +267,174 @@ def ReadData(data_path,max_batch_size,imgsize):
 
     return data_loader
 
-def InitModel(yamlpath):
-    net, data_path,\
-    train_epch, max_batch_size,\
-    train_lr, train_wd, model, imgsize = read_yaml(yamlpath)
-    data_loader = ReadData(data_path,max_batch_size,imgsize)
-    save_dir = '../params'  # 保存模型的根文件夹路径
-    weight_path, train_result_path = mkdirr(save_dir,train = True)
-    check(train_epch)
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    total_trainimgs = len(data_loader.dataset)
-    print('train_imgs:         \033[92m{}\033[0m'.format(total_trainimgs))
-    print('device:             \033[92m{}\033[0m'.format(device))
 
-    net = net.to(device)
-    opt = optim.Adam(net.parameters(),lr = train_lr)
+class InitModel():
+    def __init__(self, yamlpath):
+        self.yamlpath = yamlpath
+        self.train_data_path = ''
+        self.val_data_path = ''
+        self.train_epch = 0
+        self.max_batch_size = 0
+        self.nc = 0
+        self.train_lr = 0
+        self.train_wd = 0
+        self.model = ''
+        self.img_size = (320, 240)
+        self.debug = False
+
+        self.read_yaml()
+        self.data_loader = ReadData(self.train_data_path,self.max_batch_size,self.img_size)
+        self.data_loader_val = ReadData(self.val_data_path,1,self.img_size)
+
+        if not self.debug:
+            check(self.train_epch)
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        total_trainimgs = len(self.data_loader.dataset)
+        save_dir = '../params'  # 保存模型的根文件夹路径
+        self.weight_path, self.train_result_path = mkdirr(save_dir,train = True)
+        self.net = self.net.to(device)
+        self.opt = optim.Adam(self.net.parameters(),lr = self.train_lr)
+        print('train_imgs:         \033[92m{}\033[0m'.format(total_trainimgs))
+        print('device:             \033[92m{}\033[0m'.format(device))
+
+
+    def read_yaml(self):
+        try:
+            with open(self.yamlpath, 'r',encoding='utf-8') as file:
+                config = yaml.safe_load(file)
+                # 将 YAML 转换为 Python 字典
+                self.train_data_path = config['train_data_path']
+                self.val_data_path = config['val_data_path']
+                self.train_epch = config['train_epch']
+                self.max_batch_size = config['max_batch_size']
+                self.nc = config['num_classes'] + 1
+                self.train_lr = config['train_lr']
+                self.train_wd = config['train_wd']
+                self.model = config['model']
+                self.debug = config['debug']
+                # net_list = ['UNetCB', 'UNetDC', 'VGG16UNet', 'UNetV3_2', 'UNetV3']
+                net_dic = {'UNetCB': 'UNetCB(num_classes = self.nc)',
+                'UNetDC': 'UNetDC(num_classes = self.nc)',
+                'VGG16UNet': 'VGG16UNet(num_classes = self.nc)',
+                'UNetV3_2': 'UNetV3_2(out_channels = self.nc)',
+                'UNetV3': 'UNetV3(out_channels = self.nc)',
+                'UNetV4': 'UNetV4(out_channels = self.nc)',
+
+                }
+                self.img_size = (config["img_size"]["H"], config["img_size"]["W"])
+                if self.model not in net_dic:
+                    print('\033[91m' + "Error Net. Please check your yaml. \n"+'path: '+self.file_path + '\033[0m')
+                    sys.exit()
+                else:
+                    self.net = eval(net_dic[self.model])
+                    print('------------------------------------------------------------------')
+                    print('debug:             \033[92m{}\033[0m'.format(self.debug))
+                    print('model:             \033[92m{}\033[0m'.format(self.model))
+                    print('train:             \033[92m{}\033[0m'.format(self.train_data_path))
+                    print('train_epch:        \033[92m{}\033[0m'.format(self.train_epch))
+                    print('max_batch_size:    \033[92m{}\033[0m'.format(self.max_batch_size))
+                    print('num_classes:       \033[92m{}\033[0m'.format(self.nc))
+                    print('train_lr:          \033[92m{}\033[0m'.format(self.train_lr))
+                    print('train_wd:          \033[92m{}\033[0m'.format(self.train_wd))
+                    print('img_size_H*W:      \033[92m{}\033[0m'.format(self.img_size))
+                    print('------------------------------------------------------------------')
+            # return data
+        except FileNotFoundError:
+            print("配置文件不存在")
+
+        except yaml.YAMLError:
+            print("配置文件格式错误")
+
+
+# def InitModel(yamlpath):
+#     net, data_path,\
+#     train_epch, max_batch_size,\
+#     train_lr, train_wd, model, imgsize = read_yaml(yamlpath)
+#     data_loader = ReadData(data_path,max_batch_size,imgsize)
+#     save_dir = '../params'  # 保存模型的根文件夹路径
+#     weight_path, train_result_path = mkdirr(save_dir,train = True)
+#     check(train_epch)
+#     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#     total_trainimgs = len(data_loader.dataset)
+#     print('train_imgs:         \033[92m{}\033[0m'.format(total_trainimgs))
+#     print('device:             \033[92m{}\033[0m'.format(device))
+
+#     net = net.to(device)
+#     opt = optim.Adam(net.parameters(),lr = train_lr)
     
 
 
-    return net, opt, train_epch, data_loader, weight_path, train_result_path, model
+#     return net, opt, train_epch, data_loader, weight_path, train_result_path, model
 
 
-
+import numpy as np
+__all__ = ['SegmentationMetric']
+ 
+"""
+confusionMetric  # 注意：此处横着代表预测值，竖着代表真实值，与之前介绍的相反
+P\L     P    N
+P      TP    FP
+N      FN    TN
+"""
+class SegmentationMetric(object):
+    def __init__(self, numClass):
+        self.numClass = numClass
+        self.confusionMatrix = np.zeros((self.numClass,)*2)
+ 
+    def pixelAccuracy(self):
+        # return all class overall pixel accuracy
+        #  PA = acc = (TP + TN) / (TP + TN + FP + TN)
+        acc = np.diag(self.confusionMatrix).sum() /  self.confusionMatrix.sum()
+        return acc
+ 
+    def classPixelAccuracy(self):
+        # return each category pixel accuracy(A more accurate way to call it precision)
+        # acc = (TP) / TP + FP
+        classAcc = np.diag(self.confusionMatrix) / self.confusionMatrix.sum(axis=1)
+        return classAcc # 返回的是一个列表值，如：[0.90, 0.80, 0.96]，表示类别1 2 3各类别的预测准确率
+ 
+    def meanPixelAccuracy(self):
+        classAcc = self.classPixelAccuracy()
+        meanAcc = np.nanmean(classAcc) # np.nanmean 求平均值，nan表示遇到Nan类型，其值取为0
+        return meanAcc # 返回单个值，如：np.nanmean([0.90, 0.80, 0.96, nan, nan]) = (0.90 + 0.80 + 0.96） / 3 =  0.89
+ 
+    def meanIntersectionOverUnion(self):
+        # Intersection = TP Union = TP + FP + FN
+        # IoU = TP / (TP + FP + FN)
+        intersection = np.diag(self.confusionMatrix) # 取对角元素的值，返回列表
+        union = np.sum(self.confusionMatrix, axis=1) + np.sum(self.confusionMatrix, axis=0) - np.diag(self.confusionMatrix) # axis = 1表示混淆矩阵行的值，返回列表； axis = 0表示取混淆矩阵列的值，返回列表 
+        IoU = intersection / union  # 返回列表，其值为各个类别的IoU
+        mIoU = np.nanmean(IoU) # 求各类别IoU的平均
+        return mIoU
+ 
+    def genConfusionMatrix(self, imgPredict, imgLabel): # 同FCN中score.py的fast_hist()函数
+        # remove classes from unlabeled pixels in gt image and predict
+        mask = (imgLabel >= 0) & (imgLabel < self.numClass)
+        label = self.numClass * imgLabel[mask] + imgPredict[mask]
+        count = np.bincount(label, minlength=self.numClass**2)
+        confusionMatrix = count.reshape(self.numClass, self.numClass)
+        return confusionMatrix
+ 
+    def Frequency_Weighted_Intersection_over_Union(self):
+        # FWIOU =     [(TP+FN)/(TP+FP+TN+FN)] *[TP / (TP + FP + FN)]
+        freq = np.sum(self.confusion_matrix, axis=1) / np.sum(self.confusion_matrix)
+        iu = np.diag(self.confusion_matrix) / (
+                np.sum(self.confusion_matrix, axis=1) + np.sum(self.confusion_matrix, axis=0) -
+                np.diag(self.confusion_matrix))
+        FWIoU = (freq[freq > 0] * iu[freq > 0]).sum()
+        return FWIoU
+ 
+ 
+    def addBatch(self, imgPredict, imgLabel):
+        assert imgPredict.shape == imgLabel.shape
+        self.confusionMatrix += self.genConfusionMatrix(imgPredict, imgLabel)
+ 
+    def reset(self):
+        self.confusionMatrix = np.zeros((self.numClass, self.numClass))
     
 
 if __name__ == '__main__':
-    read_yaml('F:/Code/UnetV3/cofig/train.yaml')
+
+    InitModel('F:/Code/UnetV3/cofig/train.yaml')
+    # read_yaml('F:/Code/UnetV3/cofig/train.yaml')
+    # metric = SegmentationMetric(6)

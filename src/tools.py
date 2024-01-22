@@ -319,6 +319,7 @@ class InitModel():
                 'UNetV3_2': 'UNetV3_2(out_channels = self.nc)',
                 'UNetV3': 'UNetV3(out_channels = self.nc)',
                 'UNetV4': 'UNetV4(out_channels = self.nc)',
+                'UNet_Fire': 'UNet_Fire(out_channels = self.nc)'
 
                 }
                 self.img_size = (config["img_size"]["H"], config["img_size"]["W"])

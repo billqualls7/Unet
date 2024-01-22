@@ -22,7 +22,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import tools
 from torch.utils import mkldnn as mkldnn_utils
-
+import unets
 # from egeunet import *
 #'''
 #description: 
@@ -157,14 +157,16 @@ def get_angle(img):
 
 if __name__ == "__main__":
     time0 = time.time()
-    save_dir = 'run/infer'  # 保存推理结果的根文件夹路径
-    weights='params/exp12\min_loss.pt'                      #权重路径+名称
+    save_dir = '../run/infer'  # 保存推理结果的根文件夹路径
+    # weights=r'F:\Code\UnetV3\params\exp1\UNetV3_2_min_loss.pt'   
+    weights = r'F:\Code\UnetV3\params\exp2\UNet_Fire_min_loss.pt'                   #权重路径+名称
     _input=r"F:\Code\UnetV3\demo/"    #测试集路径
     # num_classes = 6 #标签数量
     previous_left_fit = [0, 0, 0]
     previous_right_fit = [0, 0, 0]
     # net=UNet(6).cuda()
-    # net=UNet(out_channels = num_classes).cuda()   #import wyUnet
+    net=unets.UNet_Fire(out_channels = 6)
+    # net=unets.UNetV3_2(out_channels = 6)    #import wyUnet
     # net = EGEUNet(num_classes = num_classes).cuda() 
     # print(next(net.parameters()).device) 
     size=(256, 256)
@@ -172,8 +174,8 @@ if __name__ == "__main__":
     i=len(filenames)
 
     if os.path.exists(weights):
-        # net.load_state_dict(torch.load(weights))
-        net = torch.load(weights, map_location=torch.device('cpu'))
+        net.load_state_dict(torch.load(weights))
+        # net = torch.load(weights, map_location=torch.device('cpu'))
         # net.half()
         net.eval()
         # net = mkldnn_utils.to_mkldnn(net)
@@ -199,8 +201,8 @@ if __name__ == "__main__":
             # img_data=transform(img).cuda()
             img_data=transform(img)
             img_data=torch.unsqueeze(img_data,dim=0)
-            plt.imshow(img)
-            plt.show()
+            # plt.imshow(img)
+            # plt.show()
             # net.eval()
             time1=time.time()
             ##开始预测
@@ -227,8 +229,8 @@ if __name__ == "__main__":
             #计算偏差角度
             vtherror=get_angle(out)
             time2=time.time()
-            plt.imshow(out, cmap='gray')
-            plt.show()
+            # plt.imshow(out, cmap='gray')
+            # plt.show()
             print('---------------------------')
             print("vtherror:",vtherror)
             print("fps:",1/(time2-time1))

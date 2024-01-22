@@ -23,7 +23,7 @@ data_path = 'E:/Code/wyUnet/data'
 
 
 
-- [x] 请到src\utils.py size=(320, 240)修改模型输入输出大小即图片的H*W，后续集成到yaml文件中
+- [x] 请到src\utils.py size=(320, 240)修改模型输入输出大小即图片的H*W，后续集成到yaml文件中（v3.4.1已修复）
 
     
 
@@ -37,20 +37,22 @@ data_path = 'E:/Code/wyUnet/data'
    test = globalpath+"testDataset/"		## 测试集
    ```
 
-2. src\train.py  ：训练  
+2. src\train.py  ：训练  终端进入src目录下
 
 ```bash
 终端执行------------
-python train.py -h
+F:\Code\UnetV3\src>python train.py -h
 终端输出------------
-usage: ./train.py [-h] [--yamlpath] [--onnx]
+usage: ./train.py [-h] [--yamlpath] [--onnx] [--val]
 
 Unet train.py
 
 optional arguments:
   -h, --help   show this help message and exit
-  --yamlpath   train params
+  --yamlpath   train params default:cofig/train.yaml
   --onnx       creat onnx ? True or False default=False
+  --val        use val ? True or False default=True
+
   
 终端执行------------ 选择生成ONNX模型 
 python train.py --onnx True
@@ -281,17 +283,53 @@ Execution time:               0.29 minutes
 
 请到val文件夹中查看训练效果
 
-（在每个训练周期结束后，通过比较验证集的损失，决定是否需要降低学习率。如果验证集的损失没有下降，则将学习率减小到原来的10%。**数据集样本过少，这点还需验证是否生效**       这块代码有点问题 之后再改）
+> （在每个训练周期结束后，通过比较验证集的损失，决定是否需要降低学习率。如果验证集的损失没有下降，则将学习率减小到原来的10%。**数据集样本过少，这点还需验证是否生效**       这块代码有点问题 之后再改）
+>
+> 优化数据集存放结构
+>
+> 增加混淆矩阵及其相关性能指标可视化模块，详见src\tools.py SegmentationMetric
+>
+> [【语义分割】评价指标：PA、CPA、MPA、IoU、MIoU详细总结和代码实现_语义分割mpa计算公式-CSDN博客](https://blog.csdn.net/smallworldxyl/article/details/121570419?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_utm_term~default-5-121570419-blog-127939004.235^v40^pc_relevant_anti_vip_base&spm=1001.2101.3001.4242.4&utm_relevant_index=8)
+>
+> acc曲线存疑，后续有足够的数据集再验证这部分的正确性
+>
 
-优化数据集存放结构
+#### wyunet-v3.4.1 2024-01-22
 
-增加混淆矩阵及其相关性能指标可视化模块，详见src\tools.py SegmentationMetric
+增加验证集参数，默认开启，训练结束前会对验证集进行推理并且将图片保存到和模型同一目录下
 
-[【语义分割】评价指标：PA、CPA、MPA、IoU、MIoU详细总结和代码实现_语义分割mpa计算公式-CSDN博客](https://blog.csdn.net/smallworldxyl/article/details/121570419?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_utm_term~default-5-121570419-blog-127939004.235^v40^pc_relevant_anti_vip_base&spm=1001.2101.3001.4242.4&utm_relevant_index=8)
+```python
+  parser.add_argument('--val', type=bool, metavar='', default=True, help='use val ? True or False default=False')
+```
 
-acc曲线存疑，后续有足够的数据集再验证这部分的正确性
+增加fire模块，详见SqueezeNet
 
+```latex
+@article{iandola2016squeezenet,
+  title={SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and< 0.5 MB model size},
+  author={Iandola, Forrest N and Han, Song and Moskewicz, Matthew W and Ashraf, Khalid and Dally, William J and Keutzer, Kurt},
+  journal={arXiv preprint arXiv:1602.07360},
+  year={2016}
+}
+```
 
+优化网络结构，即unets\unet_Fire.py，该网络需要增加训练轮次，最少200次以上
+
+根据summary.py程序计算，该网络结构参数量减少约13%
+
+|   Model   | Estimated Total Size (MB): |
+| :-------: | :------------------------: |
+| UNetV3_2  |           232.13           |
+| UNet_Fire |           203.56           |
+
+仅用CPU推理 （pytorch原生推理）
+
+|   Model   | FPS  |
+| :-------: | :--: |
+| UNetV3_2  | 13.5 |
+| UNet_Fire | 17.8 |
+
+- [ ] 更换数据集重新训练一下，UNet_Fire在识别左车道线时收敛比较慢，感觉像是数据集的问题
 
 
 

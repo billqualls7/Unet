@@ -2,7 +2,7 @@
 Author: Wuyao 1955416359@qq.com
 Date: 2023-11-03 19:19:26
 LastEditors: Wuyao 1955416359@qq.com
-LastEditTime: 2024-01-19 20:37:37
+LastEditTime: 2024-01-22 16:18:39
 FilePath: /UnetV3/src/train.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
@@ -37,9 +37,9 @@ train_acc_list = []
 if __name__ == '__main__':
     parser = argparse.ArgumentParser("./train.py", description='Unet train.py')
     # 给这个解析对象添加命令行参数
-    parser.add_argument('--yamlpath', type=str, metavar='', default=yamlpath ,help='train params')
+    parser.add_argument('--yamlpath', type=str, metavar='', default=yamlpath ,help='train params default:cofig/train.yaml')
     parser.add_argument('--onnx', type=bool, metavar='', default=False, help='creat onnx ? True or False default=False')
-    parser.add_argument('--val', type=bool, metavar='', default=False, help='use val ? True or False default=False')
+    parser.add_argument('--val', type=bool, metavar='', default=True, help='use val ? True or False default=True')
     args = parser.parse_args()  # 获取所有参数
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

@@ -6,7 +6,7 @@ from torch.autograd import Variable
 from collections import OrderedDict
 import numpy as np
 from tools import *
-
+import unets
 def summary(model, input_size, batch_size=-1, device="cuda"):
     def register_hook(module):
 
@@ -116,9 +116,11 @@ def summary(model, input_size, batch_size=-1, device="cuda"):
 
 if __name__ == '__main__':
 
-    weights='params/exp6/min_loss.pt'
-    input_size = ( 3, 240, 320)
-    net = torch.load(weights)
+    weights='../params/exp2/UNet_Fire_min_loss.pt'
+    input_size = (3, 240, 320)
+    net=unets.UNet_Fire(out_channels = 6).cuda()
+    net.load_state_dict(torch.load(weights))
+    # net
     print(summary(net,input_size))
 
 

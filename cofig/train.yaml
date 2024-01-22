@@ -6,15 +6,15 @@
 
 train_data_path: 'F:/Code/UnetV3/dataset/trainDataset'
 val_data_path: 'F:/Code/UnetV3/dataset/valDataset'
-train_epch: 150                               # 训练次数
+train_epch: 200                               # 训练次数
 max_batch_size: 16                            # 表示每个批次的样本数量
 num_classes:  5                               # 不算背景
 train_lr: 0.01                               # 学习率
 train_wd: 0.00                               # 正则化项的权重衰减系数，以减小模型参数的大小
 debug: True
 
-model: 'UNetV3_2'
-# net_list = ['UNetCB', 'UNetDC', 'VGG16UNet', 'UNetV3_2', 'UNetV3', 'UNetV4']
+model: 'UNet_Fire'
+# net_list = ['UNetCB', 'UNetDC', 'VGG16UNet', 'UNetV3_2', 'UNetV3', 'UNetV4', 'UNet_Fire']
 
 img_size:
   H: 320

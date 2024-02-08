@@ -56,6 +56,38 @@ optional arguments:
   
 终端执行------------ 选择生成ONNX模型 
 python train.py --onnx True
+终端输出------------
+
+------------------------------------------------------------------
+model:             UNetV3_2
+data_path:         F:/Code/UnetV3/trainDataset
+train_epch:        4
+max_batch_size:    16
+num_classes:       6
+train_lr:          0.01
+train_wd:          0.0
+img_size_H*W:      (320, 240)
+------------------------------------------------------------------     
+2024-01-16 22:25:59
+save path:     ../params\exp11
+train_imgs:         122
+device:             cuda
+0%|                                           | 0/8 [00:00<?, ?it/s]0-0-train_loss===>>1.9120261669158936
+ 12%|████▍                              | 1/8 [00:01<00:10,  1.48s/it]0-1-train_loss===>>1.8240903615951538
+ 25%|████████▊                          | 2/8 [00:02<00:05,  1.09it/s]0-2-train_loss===>>1.695765733718872
+ 38%|█████████████▏                     | 3/8 [00:02<00:03,  1.36it/s]0
+ ....
+ ....
+ .....
+------------------------------------------------------------------
+Trans model successfully at ../params\exp11\model.onnx
+------------------------------------------------------------------     
+------------------------------------------------------------------
+Save model successfully at    ../params\exp11\UNetV3_2_min_loss.pt
+mini_loss:                    0.039560265839099884
+min_loss_round:               3
+Execution time:               0.29 minutes
+------------------------------------------------------------------ 
 ```
 
 3. src\test.py ： 测试  （弃用）
@@ -68,10 +100,32 @@ python train.py --onnx True
 
 7. ModuleNotFoundError: No module named 'nets' 出现类似情况，请在报错位置使用全局路径
 
+#### wyunet-v3.4.2 2024-02-01
 
+1. Unet/src/export_unet2trt.py 将模型转为TRT优化后的网络
 
+   ```python
+     yamlpath = '../cofig/train.yaml'  # 训练时使用的参数文件
+   
+     net = InitModel(yamlpath)
+   
+     weights='../pre_model/UNet_Fire_min_loss.pt'  # 训练结束后得到模型
+   
+     save_path = '../pre_model/' # 模型转换后的保存地址
+   
+     pth2trt(weights,net,save_path)
+   ```
+
+2. Unet/src/infer.py 调用TRT API对模型进行加速推理（Jetson Nano）
+
+   |       Model        | FPS  |
+   | :----------------: | :--: |
+   | UNet_Fire(TRT_pth) |  25  |
+
+   - [ ] 更换数据集重新训练一下，UNet_Fire在识别左车道线时收敛比较慢，感觉像是数据集的问题
 
 ### wyunetv2.1  
+
     优化了车道线计算角度的逻辑
     网络参数更改，可转换为TensorRT格式文件
 
@@ -329,7 +383,29 @@ Execution time:               0.29 minutes
 | UNetV3_2  | 13.5 |
 | UNet_Fire | 17.8 |
 
-- [ ] 更换数据集重新训练一下，UNet_Fire在识别左车道线时收敛比较慢，感觉像是数据集的问题
+
+
+#### 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

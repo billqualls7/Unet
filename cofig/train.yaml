@@ -4,8 +4,8 @@
 #           F:/Code/UnetV3/trainDataset\SegmentationClass  
 # 
 
-train_data_path: 'F:/Code/UnetV3/dataset/trainDataset'
-val_data_path: 'F:/Code/UnetV3/dataset/valDataset'
+train_data_path: '../dataset/trainDataset'
+val_data_path: '../dataset/valDataset'
 train_epch: 200                               # 训练次数
 max_batch_size: 16                            # 表示每个批次的样本数量
 num_classes:  5                               # 不算背景

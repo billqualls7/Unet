@@ -59,10 +59,10 @@ def find_line_fit(img, name = "default" ,nwindows=4, margin=100, minpix=100 , mi
     for window in range(nwindows):
         start = h[1] - int(h[0] + (h[1] - h[0]) * window / nwindows)
         end = h[1] - int(h[0] + (h[1] - h[0]) * (window + 1) / nwindows)
-        print(start)
+        # print(start)
         
-        print(end)
-        print('///////////////////////')
+        # print(end)
+        # print('///////////////////////')
         histogram = np.sum(img[end:start,w[0]:w[1]], axis=0)
 
         leftx_current = np.argmax(histogram[:midpoint]) if np.argmax(histogram[:midpoint]) > minLane else leftx_current
@@ -134,8 +134,8 @@ def get_angle(img):
     # gray = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
     gray=cropped
     left, right = find_line_fit(gray)
-    print(left)
-    print(right)
+    # print(left)
+    # print(right)
     bottom_y = int(cropped.shape[0]/2)
     bottom_x_left = int(left[0] * (bottom_y ** 2) + left[1] * bottom_y + left[2])
     bottom_x_right = int(right[0] * (bottom_y ** 2) + right[1] * bottom_y + right[2])
@@ -159,20 +159,21 @@ if __name__ == "__main__":
     time0 = time.time()
     save_dir = '../run/infer'  # 保存推理结果的根文件夹路径
     # weights=r'F:\Code\UnetV3\params\exp1\UNetV3_2_min_loss.pt'   
-    weights = r'F:\Code\UnetV3\params\exp2\UNet_Fire_min_loss.pt'                   #权重路径+名称
-    _input=r"F:\Code\UnetV3\demo/"    #测试集路径
+    weights = '../pre_model/UNet_Fire_min_loss.pt'                   #权重路径+名称
+    _input='../demo'    #测试集路径
     # num_classes = 6 #标签数量
     previous_left_fit = [0, 0, 0]
     previous_right_fit = [0, 0, 0]
     # net=UNet(6).cuda()
-    net=unets.UNet_Fire(out_channels = 6)
+    net=unets.UNet_Fire(out_channels = 6).cuda()
     # net=unets.UNetV3_2(out_channels = 6)    #import wyUnet
     # net = EGEUNet(num_classes = num_classes).cuda() 
     # print(next(net.parameters()).device) 
-    size=(256, 256)
+    # size=(256, 256)
+    size = (320, 240)
     filenames = os.listdir(_input)
     i=len(filenames)
-
+    image_path = '../demo/002370.png'
     if os.path.exists(weights):
         net.load_state_dict(torch.load(weights))
         # net = torch.load(weights, map_location=torch.device('cpu'))
@@ -181,8 +182,8 @@ if __name__ == "__main__":
         # net = mkldnn_utils.to_mkldnn(net)
         print('successfully')
         # save_path = tools.mkdirr(save_dir)
-        while i>-1:
-            frame=cv2.imread(_input+'/'+filenames[i-1])
+        for i in range(30):
+            frame=cv2.imread(image_path)
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             heigh=int(frame.shape[0])
             width=int(frame.shape[1])
@@ -198,8 +199,8 @@ if __name__ == "__main__":
             img = mask.resize(size)
 
 
-            # img_data=transform(img).cuda()
-            img_data=transform(img)
+            img_data=transform(img).cuda()
+            # img_data=transform(img)
             img_data=torch.unsqueeze(img_data,dim=0)
             # plt.imshow(img)
             # plt.show()
@@ -207,7 +208,7 @@ if __name__ == "__main__":
             time1=time.time()
             ##开始预测
             # _,out=net(img_data)
-            print(img_data.shape)
+            # print(img_data.shape)
             # img_data = img_data.to_mkldnn()
             out=net(img_data)
             # out0 = out0[0]
@@ -235,8 +236,8 @@ if __name__ == "__main__":
             print("vtherror:",vtherror)
             print("fps:",1/(time2-time1))
             i-=1
-        time3 = time.time()
-        print("time:",(time3-time0))
+        # time3 = time.time()
+        # print("time:",(time3-time0))
 
     else:
         print('no loading')

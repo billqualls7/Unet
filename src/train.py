@@ -2,7 +2,7 @@
 Author: Wuyao 1955416359@qq.com
 Date: 2023-11-03 19:19:26
 LastEditors: Wuyao 1955416359@qq.com
-LastEditTime: 2024-01-22 16:18:39
+LastEditTime: 2024-01-23 16:51:17
 FilePath: /UnetV3/src/train.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
@@ -98,16 +98,18 @@ if __name__ == '__main__':
         # 验证模型
         if args.val and epoch > train_epch-5:
             net.eval()
+            val_loss = 0.0
             with torch.no_grad():
-                # val_loss = 0.0
-                for i, (val_image, segment_image) in enumerate(tqdm.tqdm(data_loader_val)):
-                    val_image, segment_image = val_image.to(device), segment_image.to(device)
+                for i, (val_image, segment_val) in enumerate(data_loader_val):
+                    val_image, segment_val = val_image.to(device), segment_val.to(device)
                     out = net(val_image)
+                    val_loss += loss_fun(out, segment_val.long())
                     out=torch.argmax(out,dim=1)
                     out=torch.squeeze(out,dim=0)
                     out=out.unsqueeze(dim=0)
                     out=(out).permute((1,2,0)).cpu().detach().numpy()
                     out=out*255.0
+                    print(f'{epoch}-{i}-val_loss===>>{val_loss.item():.10f}')
                     cv2.imwrite(f'{weight_path}/val/{i}.png',out)
 
 
